@@ -7,21 +7,21 @@
 
 clean()
 {
-	case "$gitState" in 
-    	false) 
+  case "$gitState" in 
+      false) 
            log "Exiting Normally"
            exit
            ;;
         stagged) 
            log "Unstagging all files. Moving back to HEAD"
-           git reset HEAD
+           git reset --soft HEAD
            rm output.txt
            log "Exiting"
            exit
            ;;
         committed) 
            log "Uncommiting. Moving back to HEAD"
-           git reset HEAD~1
+           git reset --soft HEAD~1
            rm output.txt
            log "Exiting"
            exit
@@ -32,34 +32,30 @@ clean()
 }
 
 log(){
-	echo "[INFO]---> $1"
+  echo "[INFO]---> $1"
 }
 err(){
-	echo "[ERROR] -> $1"
+  echo "[ERROR] -> $1"
 }
 
 askpom(){
 
-	log "Remember to Update Pom (S/N)?"
+  log "Remember to Update Pom (S/N)?"
     read answer
     case "$answer" in 
-    	s) 
-			version=$(grep -e "appbat-webcrawler${name}</artifactId>" -n pom.xml > t && sed --quiet -n $(( $(grep --no-messages -o -e "[0-9]\+" t) + 1))p pom.xml > t && grep -o -e "[0-9\.]*" t)
-			log "Actual version is: $version"
-			rm t
-           # version=$(findstr "<version>" pom.xml)
-           # log "Actual version is:" 
-           # log " $version" | sed -n 2p
-
+      s) 
+       version=$(grep -e "appbat-webcrawler${name}</artifactId>" -n pom.xml > t && sed --quiet -n $(( $(grep --no-messages -o -e "[0-9]\+" t) + 1))p pom.xml > t && grep -o -e "[0-9\.]*" t)
+       log "Actual version is: $version"
+       rm t
            log "Is it correct (S/N)?"
            read answer
            case "$answer" in 
-		    	s)  
-		          ;;
-		        n) log "Update pom and execute again"
-		           exit
-		           ;;
-		        *) askpom
+          s)  
+              ;;
+            n) log "Update pom and execute again"
+               exit
+               ;;
+            *) askpom
 
     esac
 
@@ -75,18 +71,18 @@ askpom(){
 
 askstaged(){
 
-	
+  
     sleep 2
     status=$(git status)
     sleep 1
     if [[ $status != *"pom"* ]]
       then
-		log "File pom.xml dosent differ from HEAD. Can´t stage"
-		sleep 1
-	fi
+    log "File pom.xml dosent differ from HEAD. Can´t stage"
+    sleep 1
+  fi
     
     if  [[ $status != *"/${names}SpiderProcess.java"* ]]
-    	then
+      then
         log "File /${names}SpiderProcess.java dosent differ from HEAD. Can´t stage"
         sleep 1
     fi  
@@ -96,10 +92,10 @@ askstaged(){
     sleep 1
     git status
     sleep 1
-	log "Are al the files needed stagged (S/N)?"
+  log "Are al the files needed stagged (S/N)?"
     read answer
      case "$answer" in 
-    	s) 
+      s) 
            ;;
         n) log "Write command of file needed to be stagged. (file1 file2 file3 ...)." 
            read answer 
@@ -113,18 +109,19 @@ askstaged(){
 }
 
 askcommit(){
-	 log "Check commit message"
-	 echo "         "
+
+  log "Check commit message"
+  echo "         "
     sleep 2
     git log
     log "Are you stasified with the message (S/N)?"
     read answer 
     case "$answer" in 
-    	s) 
+      s) 
            ;;
         n) log "Write new commit message." 
            read answer 
-           git commit --amend -m $answer
+           git commit --amend -m "$answer"
            askcommit
            ;;
         *) askcommit
@@ -136,7 +133,7 @@ askpush(){
     log "Everything Done. Push to develop (S/N)?"
     read answer
      case "$answer" in 
-    	s) # git -c http.sslVerify=false push
+      s) git -c http.sslVerify=false push
            ;;
         n) clean
            ;;
@@ -145,43 +142,16 @@ askpush(){
     
 }
 
-mergeFunc(){
-
-	log "Do you want to merge to master? (s/n)"
-    read answer 
-     case "$answer" in 
-    	s) 
-           master=$(git checkout master)
-           log "Change branch to master"
-           sleep 1
-    	   # git merge develop  
-           ;;
-        n) log "Do you want to return to the state before running the script? (s/n)"
-           read answer 
-            case "$answer" in 
-		    	s) clean
-		           ;;
-		        n) log "Exiting without returning to previous state."
-				   rm output.txt
-				   log "Finished"
-
-		           ;;
-		        *) askpush
-            esac
-            ;;
-        *) askpush
-    esac
-}
 
 gitFunc()
 {
 
-	trap  clean SIGINT
+  trap  clean SIGINT
 
     askpom
-	branch=$(git --git-dir ../.git branch | grep \*)
-	if [[ $branch != *"develop"* ]]; then
-		git checkout develop
+  branch=$(git --git-dir ../.git branch | grep \*)
+  if [[ $branch != *"develop"* ]]; then
+    git checkout develop
     fi
 
     fileName="src/main/java/com/inditex/ecom/appbatwebcrawler${name}/process/strategy/${names}SpiderProcess.java"
@@ -197,13 +167,13 @@ gitFunc()
    
     log "Write commit sentence"
     read answer
-    git commit -m answer
-    girState=commited
+    git commit -m "$answer"
+    gitState=commited
     askcommit
 
     askpush
 
-    #mergeFunc
+    
 
 
 
@@ -220,51 +190,51 @@ declare gitState=false
 
 
 case $1 in 
-	PB) 
+  PB) 
          log "Executing Pull&Bear"
-	     code=2
-	     name="pull"
-	     names="Pull"
+       code=2
+       name="pull"
+       names="Pull"
          ;;
 
-    BK)  log "Executing Bershka"
+    BS)  log "Executing Bershka"
          code=4
          name="bershka"
-	     names="Bershka"
+       names="Bershka"
          ;;
     ST)  log "Executing Stradivarius"
          code=6
          name="stradivarius"
-	     names="Stradivarius"
+       names="Stradivarius"
          ;;
-	OY)  log "Executing Oysho"
+  OY)  log "Executing Oysho"
          code=7
          name="oysho"
-	     names="Oysho"
+       names="Oysho"
          ;;
-	DT)  log "Executing Massimo Dutti"
+  MD)  log "Executing Massimo Dutti"
          code=11
          name="dutti"
-	     names="Dutti"
+       names="Dutti"
          ;;
-	ZH)  log "Executing ZaraHome"
+  ZH)  log "Executing ZaraHome"
          code=14
          name="zarahome"
-	     names="Zhome" 
+       names="Zhome" 
          ;;
-	UT)  log "Executing Uterque"
+  UT)  log "Executing Uterque"
          code=18
          name="uterque"
-	     names="Uterque"
+       names="Uterque"
          ;;
     -help) log "
-Pull&Bear->PB
-Bershka->BK
-Stradivarius->ST
-Oysho->OY
-Dutti->DT
-ZaraHome->ZH
-Uterque->UT"
+      Pull&Bear->PB
+      Bershka->BS
+      Stradivarius->ST
+      Oysho->OY
+      Dutti->MD
+      ZaraHome->ZH
+      Uterque->UT"
           exit
           ;;
 
@@ -290,18 +260,18 @@ sleep 1
 case "$condition" in
     *SUCCESSFUL*) 
        log "BUILD SUCCESSFUL"
- 	   log "UNZIPPING..."
-	   mkdir $path
-	   zip=$(unzip $path -d $path)
-	   log "RUNNING SPIDER..."
-	   sleep 1
+     log "UNZIPPING..."
+     mkdir $path
+     zip=$(unzip $path -d $path)
+     log "RUNNING SPIDER..."
+     sleep 1
        $run -c $code
        read p
        sleep 2
        log "Do you Want to push to the repository (S/N)?"
        read answer
        case "$answer" in 
-       	s)  gitFunc name names
+        s)  gitFunc name names
             ;;
         *)  log "Not Pushing. Exiting.."
             ;;
@@ -310,7 +280,7 @@ case "$condition" in
 
     *FAILURE* ) err "BUILD FAILURE";;
 
-    *) err "Error: Executing mvn clean install";;	
+    *) err "Error: Executing mvn clean install";; 
 esac
 
 rm output.txt
