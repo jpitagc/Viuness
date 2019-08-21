@@ -16,7 +16,7 @@ git help [command] --> gets help of a specific command
 
 git or git help 
 
-git [command] -h --> to get specific help of that command  	
+git [command] -h --> to get specific help of that command   
 
 
 -------------------How to read git help ??---------------------------
@@ -136,13 +136,13 @@ git log --graph --> will display this graph with all branches
 git object --> git uses objects to store all the date os a repository 
                there are 4 kinds os objects 
 
-               	Commit object --> Simple text file that contains information such as : commit user info, commit message, reference to commit parent(s), reference to the root tree of the proyect.
+                Commit object --> Simple text file that contains information such as : commit user info, commit message, reference to commit parent(s), reference to the root tree of the proyect.
 
-               	Annotated tag --> reference to a specific commit 
+                Annotated tag --> reference to a specific commit 
 
-               	Tree          --> contains directories and file names of the proyect 
+                Tree          --> contains directories and file names of the proyect 
 
-               	Blob          -->  stores the content of a file that is being managed by git 
+                Blob          -->  stores the content of a file that is being managed by git 
 
 
 
@@ -187,11 +187,11 @@ this characters can be combined as wanted to navigate throw the git graph
 
 
 TAG is a label for a specific commit. 
-		There are two types:  
-								LightWeight Tag --> implemented as a simple reference. Point to a certain object of git 
+    There are two types:  
+                LightWeight Tag --> implemented as a simple reference. Point to a certain object of git 
 
-								Annotataed Tag --> one of the four git objects listed before. Is similar to a commit object beacuse it includes metadata (tag author info, tag date, tag message and Id of the object referenced)
-													this tags can be signed and verify with GNU Privacy Guard. Enables managers to sign releases. There are often better than lightweight tags 
+                Annotataed Tag --> one of the four git objects listed before. Is similar to a commit object beacuse it includes metadata (tag author info, tag date, tag message and Id of the object referenced)
+                          this tags can be signed and verify with GNU Privacy Guard. Enables managers to sign releases. There are often better than lightweight tags 
 
 You can use tag as refeerences to show commits--> git show 1.0.9
 
@@ -200,8 +200,8 @@ How to add tags to a commit??
 git tag <tagname> [<commit>]   example   git tag 1.0.13 master   --> by default git uses HEAD if no other reference or cmmit is specified by the command
 
 git tag -a [-m <msg> | -F <file>] <tagname> [<commit>] --> to create a annotated tag. U must specify a tag msg, thsi can be done in several ways. 1. -m "message"
-																																				  2. -F filename
-																																				  3. No to specify flag so an editor will open so that you can write the message  
+                                                                          2. -F filename
+                                                                          3. No to specify flag so an editor will open so that you can write the message  
 
 para borrar un tag del remote. -->  git push origin :refs/tags/<tagname>
 
@@ -289,6 +289,283 @@ Types:
 
        3. Squash Merge 
        4. Rebase
+
+
+
+
+
+WEEK 3:
+
+
+ RESOLVING MERGE CONFLICTS 
+
+In case two different branches make changes to the same part of a file. A person needs to make a decision in how to resolve this conflicts. Here fast-forward merges are not posible 
+When git is about to combine the work of these two branches it sees that the work on the same file is different in each branch. 
+In case different files are changed there is no problem in merging as git will know to take all the new data from both branches.  
+
+Git can also merge brenches that changed the same file if this change affects to different HUNKS.
+Example. If a branch develop is used to fix a bug form already committed code and the master branch is used to add a new feature(both in teh same file), merging would not derive in a a merging commit as git would know how to save all the progress.
+
+Th way git merge the files depends on the merge-strategy. 
+
+To avoid merging conflicts its better to use branches for small bug/features and merge as much as posible so that different branches dont diverge in code too much. Avoid braching a branch as much as posible. Modular software is less propense to deal with merge conflcits.
+
+
+RESOLVING MERGE CONFLICTS INVOLVES THREE COMMITS.
+
+1. The tip of the topic branch being merge. This commit is called "THEIRS"
+2. The tip of the master branch. This commit is called "OURS"/"MINE"
+3. A common ancestor. The commit where the topic branch was created. This commit is calles "MERGE BASE" 
+
+Basic Steps: 
+            1. Chechout master branch 
+            2. Trying to merge the topic branch. CONFLICT 
+            3. Fix the files that produce the conflict
+            4. Stage files changed
+            5. Commit the merge 
+            6. Optionally delete de topic branch  
+
+The key in this conflicts is that file with conflcits are modified by git and placed in the working tree.
+
+
+Process of conlfict resolving
+
+-git merge <topicbranch> --> Conflict shown by git 
+-git status --> will show that tou have unmerged paths and would sow many options. (git merge --abort)
+
+now git would add all the info of the different copies of teh files that result in a conflicts in this way.
+
+feature 1 
+<<<<<<<<<< HEAD 
+feature 2          --> Form OURS commit 
+===========
+feature 3          --> From THEIRS commit 
+>>>>>>>>> topicbranch
+
+once the file is fixed 
+
+-git add <file> --> to teh statgin area 
+-git commit --> you can edit the message if desired but now the branches are already merged.
+-git status --graph --> to see teh actual merge
+-git branch -d <topicbranch> --> optionally delete the topic branch as all work is commited to the master branch.
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+TRACKING BRANCHES (remote branches) 
+
+local branch that represent a remote branchs. --> <remote>/<branch> (origin/master)
+
+when you clone a remote repository the exact same references (master && HEAD && ...) are copied in the exact same way and coverted to local references. Remote references are algo copied to the graph. 
+
+tracking branches are only updated with git network commands such as clone/push/pull...  When you commit a branch with teh remote branch pushing to the last tip of the branch this reference will continue to point to the same commit until ypu push the new commit.
+
+- git branch --all --> will show all local and remote branches.  
+
+ HEAD -> origin/master will also appear. remember this is a symbolic reference. This is a really important reference beacuse is teh place where code willl be push in the remote repo. 
+
+ - git log origin/master --oneline
+ - git log origin --oneline --> origin will get the HEAD reference in the remote repo.
+
+
+ - git remote set-head <remote> <branch> --> this will set de HEAD reference to the tip of the branch specified. 
+
+
+
+ - git log --all --> to see a log of lcoal+remote repos to see if any colleague has made any changes.
+
+
+
+ ---------------------------------------------------------------------------------------------------------------------------
+
+ FETCH,PULL AND PUSH 
+
+ Network Commands --> Clone, Fetch, Pull, Push.
+
+ FETCH  -> Retrives new objects and references form the remote repository. Updates all of the traking branches. 
+          It is used to see if changes have been done to ht eremote repo without pulling them. 
+          Tracking references might have changed. Fetching wont change local references.
+
+          - git fetch --> this will display somthing if git objects have been fetched.
+          - git status --> will infomr you if yout current local branch is behind the tracking branch.
+                           (your branch is behins '<remote>/<brnach>' by x commits, and can be fast-forwarded 
+                             use git pull to update your local branch) 
+
+ PULL  -> Fetches and merges commits locally.  FETCHED_HEAD: is an alias for the tip of the tracking branch. 
+
+         new objects and references form the remote repo are fetched. If new objects are added to the tracking branch, the tracking branch is merged into the local branch. The current branch is assumed if branch is not specified.
+
+         merging options: 
+                          . --ff (default): fast forward if posible. Otherwise perform a merge commit.
+                          . --no-ff: allways include a merge commit
+          git pull        . --ff-only: cancel if fast forward is not posible. avoid a merge commit 
+                          . --rebase [--preserve-merges]: further discussed
+
+        - GIT PULL WITH FAST FORWARD MERGE:
+            1. git status --> your branch is behind remote by 1 commit
+            2. git pull 
+            3. git log --> to check that our local master label is posinting to teh master tracking label
+
+        - GIT PULL WITH CONFLICTING UNCOMMITTED CHANGES (IF CHANGES HAVE BEEN MADE TO TEH FILES THAT ARE BEING PULLED) --> is this case teh pull acts like a merge form a topic local branch but with the remote tracking master branch 
+            1. git pull --> your local changes to the following files would be overwitten by merge. Please commit your changes or stash before you merge. Aborting.
+            * only if conflict occur. If you hacve made changes to files that didnt change in the new remote commit the merge will continue succesfully.
+            2. fix the file to get what you desire 
+            3. git add <file>
+            4. git merge --continue 
+
+ PUSH  ->  git push [-u] [<reposiroty>] [<branch>] --> repo can be a name (origin) or the actual url. -u option will create a local tracking reference of this branch.
+
+Fetch or pull beafore you push is suggested. if new remote commits appear when you are about to push this command will be aborated.
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+REBASING  --> this rewittes commits so this should be done with caution. GENERAL RULE- do not rebase history that is been shared with others.
+
+Types: 
+        1. Regular Rebase: moves commits to a new parent. Because teh ancestor chain is different, each of teh reapplied commits has a different commit ID (b',c').
+                            No longer need a merge commit(because there's no new commits in the amster branch) and the merge of teh branch can be fast-forward. 
+                            Rebasing is a type of merge so is succeptible to merge conflicts.
+                            Be aware that the conflict you are resolving are for the feture branch. 
+                                      
+                   EXAMPLE:     b - c                            b' - c'  
+                               /        --> REBASE -->          /
+                              a - d                        a - d 
+
+
+                  Pros : 
+                         - You can incorporate changes from the parent branch. It makes tha eventual merge into master fats-forwardable 
+                         - Avoids unnecesary commits as merge commits often are 'stupid' --> define clean commit history 
+                  Cons : 
+                         - Megre conflicts may need to be resolve 
+                         - Can cause problems if commits have been shared (new ID's)
+                         - Your are changing the commit history
+
+                  How to perform a Rebase --> git checkout <topicbranch> and git rebase master                |_ This would change the current branch parent to the tip of the master branch
+                                                                         or  git rebase master <topicbranch>  | 
+
+
+                   MergeConflicts --> git checkout <topicbranch>
+                                      git rebase master   
+                                      -----CONFLICT-----                      ---> BEFORE RESOLVINF THE CONFLICT YPU CAN ABORT IT: git rebase --abort 
+                                      * Fix files that caused the problems 
+                                      git add <file>
+                                      git rebase --continue
+
+
+        2. Interactive Rebase 
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+REWRITTING HISTORY 
+
+Amending a commit: 
+
+          1. Amending to change de commit message.  git commit --amend -m "new commit message"
+          2. Amending the commit to change a file.  -change file
+                                                    - git add <file>
+                                                    - git commit -amend --no-edit --> no edit option is to maintain the previous commit message.
+
+Interactive Rebase: Interactive rebesae lets you edit commit using commands. The commits can belong to any branch, history is change so do not use for shared commits.
+  
+                   git rebase -i <commit> --> this will let you do different action for each commit listed after the commit specified in the command:
+
+                   Afeter executing a file will open to specify the actions to be done with each child commit of teh specified one. 
+
+                            - Use the commit as is --> do nothing with this commit 
+                            - Edit the commit message
+                            - Stop and edit the commit --> going one by one the commit rebase will perform de actions described in the rebase interactive file. In this commit the rebase will halt to let you edit the commmit in a detached head state.
+                            - Drop/Delete the commit 
+                            - Squash 
+                            - Fixup 
+                            - Reorder Commits 
+                            - Execute Shell commands 
+
+
+                            # Commands:
+                            #  p, pick = use commit
+                            #  r, reword = use commit, but edit the commit message
+                            #  e, edit = use commit, but stop for amending
+                            #  s, squash = use commit, but meld into previous commit
+                            #  f, fixup = like "squash", but discard this commit's log message
+                            #  x, exec = run command (the rest of the line) using shell
+                            #  d, drop = remove commit
+                            #
+                            # These lines can be re-ordered; they are executed from top to bottom.
+                            #
+                            # If you remove a line here THAT COMMIT WILL BE LOST.
+                            #
+                            # However, if you remove everything, the rebase will be aborted.
+                            #
+                            # Note that empty commits are commented out
+
+
+                         edit --  If we choose edit, the rebase interactive will stop in this commit, let s ammend the commit (commit message, file or both) and then execute git rebase --continue to keep rebasing.
+                         drop --  will delete a commit and all the work of that commit 
+                         squash -- performs three actions: this is applied to teh last of the two commits you want to squash.
+                                                           (fixup is the same but the squashed commit message is discarded).
+                                                              1. Applies a newer (squashed) commit to an older commit 
+                                                              2. Combines the commit messages 
+                                                              3. Removes the newer commit 
+
+
+SQUASH MERGE: Merges the tip of the feature branch onto the tip of the master branch. This will squash all the feature branch into a single commit and will merge it onto the master branch. Places the result on teh stagging area and the result can be committed. 
+              the feature branch will no longe be part og the re`pository and will be collected by teh garbage collector 
+
+
+                b - d                                                      Actions:    git checkout master
+               /               ---> Squash Merge --->    a - c - d                     git merge --squash <featurebranch>
+              a - c                                                                    git commit 
+                                                                                       git brach -D <featurebranch>
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+WEEK 4
+
+PULL REQUESTS --> A feature of Git hosting sites. The goal is to merge a branch into teh proyect. Enable team communication related to work of the branch.
+                  - Notifications sent to tam members 
+                  - Feedback or comments 
+                  - Aproval of the contetnt(code review)
+
+    TYPES depending on the remote configuration: single remote repository (common one). Multi-repository is a pull request to merge a fork repository onto the upstream Repository this is common if the submitter dosen´t hace access to teh upstream repo.  
+
+      When do you OPEN a pull request?
+
+        - When teh branch is created to start communicating with the team 
+        - When you need comments on the branch
+        - When the branch is ready for review and merging 
+
+
+        Pull request are OPENED by the GUI 
+
+
+FORK --> copying a remote repo to your own online account. Both are considered remote repositories, the upstream repository is considered the source of truth.
+
+   This is a feature of teh web hosting service such as github or bitbucket. Once you fork a repository the forked repo will not contain new commit to the upstream repository. The web hosting will show that this repository is 1 commit behind <upstreamRepository>
+   There is a sync now button to resychronize. Synchronizing will create a merge commit on the forked repo. 
+
+   MULTI-REPOSITORY PULL REQUEST: 
+
+           - Fork teh upstream branch
+           - Create a branch in the forked repo 
+           - Open a pull request 
+
+GIT WORKFLOWS --> define how a team accomplishes work, git is lexible so many options can be picked and combined as needed.
+
+       1. Centralized Workflows --> Single Branch. This workflow will lack the posibility to open pull request and review code before merging onto the master branch.
+
+       2. Feature Bramch Workflow --> All the work is in feature or topic branches and then pull request are done to the master branch. 
+
+       3. Forking Workflow --> contains multiple remote repositories. There is jsut one remote repository know as the upstream repo considered the source of truth. This is really common in open source proyects as only memebers of the upstream team will merge pull request from forked repos. Normally the forked repo team is in charge in keeping the repo up to date. Normally after forking a repor also branching is envolve to ease the task of synchronising teh fork repo with teh source of truth.
+
+       4. Gitflow Workflows -->  You have two long runnig branches. Master is reserved only for commits that represent public realeases of the proyect that are normally lightweight tagged with the number of the version to be realeased. A sencond long-running branch develop used for developping the features of the proyect but these features are coded into short-running feature branches and pull requested to the develop branch. When important ammount of work is done and the team considers that a new version release can be done all features are merged to the develop branch and these to the master branch. If after merging to develop and before merging to master some small changes have to be done to the code a release (example centain test not passed by the new commit) short-running branch can be created to perform the changes and then this branch pull requested to the master branch directly. be aware thet before continuing the progress in the develop branch this feature release branch has to be merged onto teh develop becuse if not these problem will appear again in later releases.  After the release is sent to the public bugs can be detected by users. To solve this bugs a hotfix branch can be created directly from the master branch, fix teh bug and then merge onto master directly and publish a new version. Remember to merge this hotfix branch first to the develop branch before removing thsi branch so that the bug dosent appear in future releases. 
+
+
+
 
 
 
